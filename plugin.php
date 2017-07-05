@@ -1,8 +1,8 @@
 <?php
 /**
  * @package     omeka
- * @subpackage  solr-search
- * @copyright   2012 Rector and Board of Visitors, University of Virginia
+ * @subpackage  esearch
+ * @copyright   2017 Jason Zou
  * @license     http://www.apache.org/licenses/LICENSE-2.0.html
  */
 
@@ -11,11 +11,8 @@ if (!defined('ES_DIR')) define('ES_DIR', dirname(__FILE__));
 // Plugin manager class:
 require_once ES_DIR.'/ESearchPlugin.php';
 
-// Solr PHP Client library:
-require_once ES_DIR.'/lib/solr-php-client/Document.php';
-require_once ES_DIR.'/lib/solr-php-client/Exception.php';
-require_once ES_DIR.'/lib/solr-php-client/Response.php';
-require_once ES_DIR.'/lib/solr-php-client/Service.php';
+// Elasticsearch PHP Client library:
+require_once ES_DIR. 'vendor/autoload.php';
 
 // ESearch utility classes:
 require_once ES_DIR.'/lib/ESearch/Addon/Addon.php';
@@ -39,5 +36,5 @@ require_once ES_DIR.'/forms/ESearch_Form_Reindex.php';
 // Jobs:
 require_once ES_DIR.'/jobs/ESearch_Job_Reindex.php';
 
-$solr = new ESearchPlugin();
-$solr->setUp();
+$es = new ESearchPlugin();
+$es->setUp();

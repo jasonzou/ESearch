@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @package     omeka
  * @subpackage  esearch
@@ -7,11 +6,9 @@
  * @license     http://www.apache.org/licenses/LICENSE-2.0.html
  */
 
-
 class ESearchPlugin extends Omeka_Plugin_AbstractPlugin
 {
-
-
+    
     protected $_hooks = array(
         'install',
         'uninstall',
@@ -26,12 +23,10 @@ class ESearchPlugin extends Omeka_Plugin_AbstractPlugin
         'before_delete_element'
     );
 
-
     protected $_filters = array(
         'admin_navigation_main',
         'search_form_default_action'
     );
-
 
     /**
      * Create the database tables, install the starting facets, and set the
@@ -39,18 +34,16 @@ class ESearchPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
-        self::_createSolrTables();
+        self::_createESTables();
         self::_installFacetMappings();
         self::_setOptions();
     }
-
 
     /**
      * Drop the database tables, flush the Solr index, and delete the options.
      */
     public function hookUninstall()
     {
-
         $this->_db->query(<<<SQL
         DROP TABLE IF EXISTS {$this->_db->prefix}esearch_fields
 SQL
@@ -68,9 +61,7 @@ SQL
         } catch (Exception $e) {}
 
         self::_clearOptions();
-
     }
-
 
     /**
      * If upgrading from 1.x, install the new schema.
@@ -79,7 +70,7 @@ SQL
      */
     public function hookUpgrade($args)
     {
-        self::_createSolrTables();
+        self::_createESTables();
         if (version_compare($args['old_version'], '1.0.1', '<=')) {
             self::_installFacetMappings();
             self::_setOptions();
@@ -96,7 +87,6 @@ SQL
         }
     }
 
-
     /**
      * Register the string translations.
      */
@@ -104,7 +94,6 @@ SQL
     {
         add_translation_source(dirname(__FILE__) . '/languages');
     }
-
 
     /**
      * Register the application routes.
@@ -126,7 +115,6 @@ SQL
      */
     public function hookAfterSaveRecord($args)
     {
-
         ESearch_Utils::ensureView();
 
         $record = $args['record'];
@@ -171,7 +159,6 @@ SQL
 
     }
 
-
     /**
      * When an item is saved, index the record if the item is set public, and
      * clear an existing record if it is set private.
@@ -180,7 +167,6 @@ SQL
      */
     public function hookAfterSaveItem($args)
     {
-
         ESearch_Utils::ensureView();
 
         $item = $args['record'];
@@ -198,9 +184,7 @@ SQL
         $es->addDocuments(array($doc));
         $es->commit();
         $es->optimize();
-
     }
-
 
     /**
      * When a new element is added, register a facet mapping for it.
@@ -239,7 +223,6 @@ SQL
 
     }
 
-
     /**
      * When an item is deleted, clear its Solr record.
      *
@@ -259,7 +242,6 @@ SQL
 
     }
 
-
     /**
      * When an element is deleted, remove its facet mapping.
      *
@@ -275,7 +257,6 @@ SQL
         }
     }
 
-
     /**
      * Add a link to the administrative navigation bar.
      *
@@ -290,7 +271,6 @@ SQL
         return $nav;
     }
 
-
     /**
      * Override the default simple-search URI to automagically integrate into
      * the theme; leaves admin section alone for default search.
@@ -304,11 +284,10 @@ SQL
         return $uri;
     }
 
-
     /**
      * Install the facets table.
      */
-    protected function _createSolrTables()
+    protected function _createESTables()
     {
         $this->_db->query(<<<SQL
         CREATE TABLE IF NOT EXISTS {$this->_db->prefix}esearch_fields (
@@ -333,7 +312,6 @@ SQL
         );
     }
 
-
     /**
      * Install the default facet mappings.
      */
@@ -343,7 +321,6 @@ SQL
             ->getTable('ESearchField')
             ->installFacetMappings();
     }
-
 
     /**
      * Install the default facet mappings.
@@ -357,7 +334,6 @@ SQL
             ->getTable('ESearchField')
             ->installGenericFacet($slub, $label);
     }
-
 
     /**
      * Set the global options.
@@ -376,7 +352,6 @@ SQL
         set_option('esearch_display_private_items', '1');
     }
 
-
     /**
      * Clear the global options.
      */
@@ -393,6 +368,4 @@ SQL
         delete_option('esearch_hl_max_analyzed_chars');
         delete_option('esearch_display_private_items');
     }
-
-
 }

@@ -10,7 +10,7 @@ use Elasticsearch\ClientBuilder;
 class ESearch_Helpers_Index
 {
     /**
-     * Connect to Solr.
+     * Connect to Elasticsearch.
      *
      * @param array $options An array of connection parameters.
      *
@@ -32,7 +32,7 @@ class ESearch_Helpers_Index
             ? $options['esearch_core']
             : get_option('esearch_core');
 
-        return ClientBuilder::create()->build($server, $port, $core);
+        return ClientBuilder::create()->setHosts([$server:$port])->build();
 
     }
 
@@ -76,19 +76,24 @@ class ESearch_Helpers_Index
     {
 
         $fields = get_db()->getTable('ESearchField');
-
-        $doc = new Apache_Solr_Document();
-        $doc->setField('id', "Item_{$item->id}");
-        $doc->setField('resulttype', 'Item');
-        $doc->setField('model', 'Item');
-        $doc->setField('modelid', $item->id);
-
+        $params = [
+          'index' => 'my_index',
+          'type' => 'my_type',
+          'id' => 'Item_{$item->id}',
+          'body' => ['resulttype' => 'Item',
+            'model' => 'Item',
+            'modelid' => $item->id,
+            'public' => $item->public
+          ]
+        ];
+        
         // extend $doc to to include and items public / private status
-        $doc->setField('public', $item->public);
-
+        
         // Title:
         $title = metadata($item, array('Dublin Core', 'Title'));
-        $doc->setField('title', $title);
+        $params['body']['titile'] = $title;
+
+        $response = ESearch_Helpers_Index::connect->index($params);
 
         // Elements:
         self::indexItem($fields, $item, $doc);
@@ -271,12 +276,11 @@ class ESearch_Helpers_Index
      **/
     public static function deleteAll($options=array())
     {
+        $es = self::connect($options);
 
-        $solr = self::connect($options);
-
-        $solr->deleteByQuery('*:*');
-        $solr->commit();
-        $solr->optimize();
+        $es->deleteByQuery('*:*');
+        $es->commit();
+        $es->optimize();
 
     }
 
