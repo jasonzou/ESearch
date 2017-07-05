@@ -1,17 +1,14 @@
 <?php
-
 /**
  * @package     omeka
  * @subpackage  solr-search
  * @copyright   2012 Rector and Board of Visitors, University of Virginia
  * @license     http://www.apache.org/licenses/LICENSE-2.0.html
  */
-
+use Elasticsearch\ClientBuilder;
 
 class ESearch_Helpers_Index
 {
-
-
     /**
      * Connect to Solr.
      *
@@ -23,19 +20,19 @@ class ESearch_Helpers_Index
     public static function connect($options=array())
     {
 
-        $server = array_key_exists('solr_search_host', $options)
-            ? $options['solr_search_host']
-            : get_option('solr_search_host');
+        $server = array_key_exists('esearch_host', $options)
+            ? $options['esearch_host']
+            : get_option('esearch_host');
 
-        $port = array_key_exists('solr_search_port', $options)
-            ? $options['solr_search_port']
-            : get_option('solr_search_port');
+        $port = array_key_exists('esearch_port', $options)
+            ? $options['esearch_port']
+            : get_option('esearch_port');
 
-        $core = array_key_exists('solr_search_core', $options)
-            ? $options['solr_search_core']
-            : get_option('solr_search_core');
+        $core = array_key_exists('esearch_core', $options)
+            ? $options['esearch_core']
+            : get_option('esearch_core');
 
-        return new Apache_Solr_Service($server, $port, $core);
+        return ClientBuilder::create()->build($server, $port, $core);
 
     }
 
